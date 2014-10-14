@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Module file for testing/development purpose.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function test_module_init() {
+}
+
+/**
+ * Implements hook_menu().
+ */
+function test_module_menu() {
+  $items = array();
+  $items['my-test-form'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_my_test_form'),
+    'access callback' => TRUE,
+  );
+  $items['my-test-1/%ctools_js/form'] = array(
+    'page callback' => '_my_test_1',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+/**
+ * Method to add the ctools related 'includes'
+ */
+function _test_module_add_ctools() {
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+}
+
+/**
+ * Menu callback for the '_my_test_form' form.
+ */
+function _my_test_form($form, &$form_state) {
+  _test_module_add_ctools();
+  $form['my-textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form 1 Textfield'),
+    '#required' => TRUE,
+  );
+  $form['form-ajax-link'] = array(
+    '#markup' => ctools_modal_text_button(t('Ajax Link'), 'my-test-1/nojs/form', '') . '<br/><br/>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Menu callback for the '_my_test_form2' form.
+ */
+function _my_test_1($js = NULL) {
+  if (!$js) {
+    return drupal_get_form('_my_test_form2');
+  }
+  _test_module_add_ctools();
+  $form_state = array(
+    'title' => t('Login'),
+    'ajax' => TRUE,
+  );
+  $output = ctools_modal_form_wrapper('_my_test_form2', $form_state);
+  if (!empty($form_state['executed'])) {
+    $output[] = ctools_modal_command_display(t('Login Success'), 'Thankyou');
+    $output[] = ajax_command_html('#main-content', 'Thankyou message');
+    $output[] = ctools_modal_command_dismiss();
+//    $output[] = ctools_modal_command_loading();
+//    $output[] = ctools_ajax_command_redirect('user');
+  }
+  print ajax_render($output);
+  exit;
+}
+
+/**
+ * Form 2 for Ctools.
+ */
+function _my_test_form2($form, $form_state) {
+  $form['my-textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form 2 Textfield'),
+    '#required' => TRUE,
+  );
+  $form['form-1-link'] = array(
+    '#markup' => l(t('Click here for form 1'), 'my-test-form') . '<br/><br/>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Form 3 for Ctools.
+ */
+function _my_test_form3($form, $form_state) {
+  $form['my-textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form 3 Textfield'),
+    '#required' => TRUE,
+  );
+  $form['form-1-link'] = array(
+    '#markup' => l(t('Click here for form 1'), 'my-test-form') . '<br/><br/>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}

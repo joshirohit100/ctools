@@ -1,0 +1,4 @@
+name = 'Test Module'
+description = 'Test module for development purpose.'
+package = Custom
+core = 7.x
